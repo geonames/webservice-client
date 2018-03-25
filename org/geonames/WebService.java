@@ -57,7 +57,7 @@ public class WebService {
 
 	private static Logger logger = Logger.getLogger("org.geonames");
 
-	private static String USER_AGENT = "gnwsc/1.1.12";
+	private static String USER_AGENT = "gnwsc/1.1.13";
 
 	private static boolean isAndroid = false;
 
@@ -1179,6 +1179,9 @@ public class WebService {
 		if (searchCriteria.getStartRow() > 0) {
 			url = url + "&startRow=" + searchCriteria.getStartRow();
 		}
+		if (searchCriteria.getFuzzy() != 1.0) {
+			url = url + "&fuzzy=" + searchCriteria.getFuzzy();
+		}
 
 		if (searchCriteria.getBoundingBox() != null) {
 			url = url + "&east=" + searchCriteria.getBoundingBox().getEast();
@@ -1705,6 +1708,31 @@ public class WebService {
 						.getChildText("dstOffset")));
 			}
 			return timezone;
+		}
+
+		return null;
+	}
+	
+	//FIXME  implement and test
+	public static String ocean(double latitude, double longitude)
+			throws IOException, Exception {
+
+		String url = "/ocean?";
+		double radius = 0;
+
+		url = url + "&lat=" + latitude;
+		url = url + "&lng=" + longitude;
+		if (radius > 0) {
+			url = url + "&radius=" + radius;
+		}
+		url = addUserName(url);
+
+		Element root = connectAndParse(url);
+		for (Object obj : root.getChildren("ocean")) {
+			Element oceanElement = (Element) obj;
+			if (oceanElement != null) {
+				return oceanElement.getChildText("name");				
+			}
 		}
 
 		return null;

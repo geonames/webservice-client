@@ -74,6 +74,8 @@ public class ToponymSearchCriteria {
 	private int maxRows;
 
 	private int startRow;
+	
+	private double fuzzy = 1.0;
 
 	private BoundingBox boundingBox;
 
@@ -383,6 +385,20 @@ public class ToponymSearchCriteria {
 
 	public void setAdminCode4(String adminCode4) {
 		this.adminCode4 = adminCode4;
+	}
+	
+	/**
+	 * @return the fuzzy
+	 */
+	public double getFuzzy() {
+		return fuzzy;
+	}
+
+	/**
+	 * @param fuzzy the fuzzy to set
+	 */
+	public void setFuzzy(double fuzzy) {
+		this.fuzzy = fuzzy;
 	}
 
 	/**

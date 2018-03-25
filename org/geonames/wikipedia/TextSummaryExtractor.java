@@ -41,6 +41,8 @@ public class TextSummaryExtractor {
 		if (pText == null) {
 			return null;
 		}
+		
+		String textCopy = new String(pText);
 
 		// remove all wikipedia markup (paragraphs are kept)
 		//
@@ -49,32 +51,32 @@ public class TextSummaryExtractor {
 
 		// loop over all characters in input string
 		while (idx > -1 && (summary.length() < 50 + 2 * length || length == 0)
-				&& idx < pText.length()) {
+				&& idx < textCopy.length()) {
 			// get next chacter
-			char c = pText.charAt(idx);
+			char c = textCopy.charAt(idx);
 
 			if (c == '{') {
 				// skip template and set idx to end of template
-				int endidx = skipTemplate(pText, idx);
+				int endidx = skipTemplate(textCopy, idx);
 				// do we have an audio template?
-				if (pText.toLowerCase().indexOf("{{audio") == idx) {
-					int begLabelIdx = pText.lastIndexOf("|", endidx);
+				if (textCopy.toLowerCase().indexOf("{{audio") == idx) {
+					int begLabelIdx = textCopy.lastIndexOf("|", endidx);
 					if (begLabelIdx > -1) {
-						String label = pText.substring(begLabelIdx + 1,
+						String label = textCopy.substring(begLabelIdx + 1,
 								endidx - 2).trim();
 						summary.append(label);
 					}
 				}
-				if (pText.toLowerCase().indexOf("{{formatnum") == idx) {
-					int begLabelIdx = pText.indexOf(":", idx);
+				if (textCopy.toLowerCase().indexOf("{{formatnum") == idx) {
+					int begLabelIdx = textCopy.indexOf(":", idx);
 					if (begLabelIdx > -1) {
 
 						int endLabelIdx = endidx - 2;
-						if (pText.indexOf("|", begLabelIdx) > -1) {
-							endLabelIdx = pText.indexOf("|", begLabelIdx);
+						if (textCopy.indexOf("|", begLabelIdx) > -1) {
+							endLabelIdx = textCopy.indexOf("|", begLabelIdx);
 						}
 
-						String label = pText.substring(begLabelIdx + 1,
+						String label = textCopy.substring(begLabelIdx + 1,
 								endLabelIdx).trim();
 						summary.append(label);
 					}
@@ -84,35 +86,35 @@ public class TextSummaryExtractor {
 				continue;
 			} else if (c == '<') {
 				// is it a html comment
-				if (pText.length() > idx + 1 && pText.charAt(idx + 1) == '!') {
+				if (textCopy.length() > idx + 1 && textCopy.charAt(idx + 1) == '!') {
 					// skip html comment
-					idx = skipHTMLComment(pText, idx);
+					idx = skipHTMLComment(textCopy, idx);
 					continue;
 				} else {
 					// html element starts here, skip it, set idx to end of html
 					// element
-					idx = skipHTMLElement(pText, idx);
+					idx = skipHTMLElement(textCopy, idx);
 					continue;
 				}
 			} else if (c == '[') {
 
 				// look ahead to see whether we have a link
-				if (pText.charAt(idx + 1) == '[') {
+				if (textCopy.charAt(idx + 1) == '[') {
 					// we have two square brackets "[[" (link)
 
 					// get the end of the double square bracket
-					int endOfLink = pText.indexOf("]]", idx);
+					int endOfLink = textCopy.indexOf("]]", idx);
 
 					// image link ?
-					int colon = pText.indexOf(":", idx);
+					int colon = textCopy.indexOf(":", idx);
 					if (colon > -1 && colon < endOfLink) {
 						// image link contains a caption which might contain
 						// a link within the link
-						idx = findEndOfLink(pText, idx);
+						idx = findEndOfLink(textCopy, idx);
 						continue;
 					}
 
-					int beginAnchor = pText.indexOf("|", idx);
+					int beginAnchor = textCopy.indexOf("|", idx);
 					if (beginAnchor > -1 && beginAnchor < endOfLink) {
 						idx = beginAnchor + 1;
 					} else {
@@ -123,7 +125,7 @@ public class TextSummaryExtractor {
 					// next character is not a square brackets and thus a
 					// reference link to be removed
 					// get the end of the square bracket
-					int endOfLink = pText.indexOf("]", idx);
+					int endOfLink = textCopy.indexOf("]", idx);
 					if (endOfLink > -1) {
 						idx = endOfLink + 1;
 						continue;
@@ -131,14 +133,14 @@ public class TextSummaryExtractor {
 				}
 			} else if (c == ']') {
 				// look ahead
-				if (idx + 1 < pText.length() && pText.charAt(idx + 1) == ']') {
+				if (idx + 1 < textCopy.length() && textCopy.charAt(idx + 1) == ']') {
 					idx = idx + 2;
 					continue;
 				}
 			} else if (c == '=') {
 				// look ahead
-				if (idx + 1 < pText.length() && pText.charAt(idx + 1) == '=') {
-					int endHeaderIdx = pText.indexOf("==", idx+2);
+				if (idx + 1 < textCopy.length() && textCopy.charAt(idx + 1) == '=') {
+					int endHeaderIdx = textCopy.indexOf("==", idx + 2);
 					if (endHeaderIdx > -1) {
 						idx = endHeaderIdx + 2;
 					}
@@ -160,6 +162,7 @@ public class TextSummaryExtractor {
 		textString = removeWhiteSpace(
 				textString.replaceAll("\r", " ").replaceAll("\n", " ")
 						.replaceAll("\t", " ")).trim();
+
 		textString = removeBold(textString);
 		textString = removeItalic(textString);
 
