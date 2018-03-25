@@ -57,7 +57,7 @@ public class WebService {
 
 	private static Logger logger = Logger.getLogger("org.geonames");
 
-	private static String USER_AGENT = "gnwsc/1.1.13";
+	private static String USER_AGENT = "gnwsc/1.1.14";
 
 	private static boolean isAndroid = false;
 
@@ -843,6 +843,15 @@ public class WebService {
 		return toponym;
 	}
 
+	/**
+	 * for US only
+	 * 
+	 * @param latitude
+	 * @param longitude
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
 	public static Address findNearestAddress(double latitude, double longitude)
 			throws IOException, Exception {
 
@@ -1012,7 +1021,120 @@ public class WebService {
 		}
 		return segments;
 	}
+	
+	/**
+	 * Find the nearest address for a given lat/lng pair. Supports several countries.
+	 * 
+	 * See documentation for the list of supported countries:
+	 * 
+	 * 	 * @see <a href="http://www.geonames.org/maps/addresses.html#address">address
+	 *      web service documentation</a>
+	 *
+	 *
+	 * @param latitude
+	 * @param longitude
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static Address address(double latitude, double longitude)
+			throws IOException, Exception {
 
+		String url = "/address?";
+
+		url = url + "&lat=" + latitude;
+		url = url + "&lng=" + longitude;
+		url = addUserName(url);
+
+		Element root = connectAndParse(url);
+		for (Object obj : root.getChildren("address")) {
+			Element codeElement = (Element) obj;
+			Address address = new Address();
+			address.setStreet(codeElement.getChildText("street"));
+			address.setStreetNumber(codeElement.getChildText("houseNumber"));
+
+			address.setPostalCode(codeElement.getChildText("postalcode"));
+			address.setPlaceName(codeElement.getChildText("locality"));
+			address.setCountryCode(codeElement.getChildText("countryCode"));
+
+			address.setLatitude(Double.parseDouble(codeElement
+					.getChildText("lat")));
+			address.setLongitude(Double.parseDouble(codeElement
+					.getChildText("lng")));
+
+			address.setAdminName1(codeElement.getChildText("adminName1"));
+			address.setAdminCode1(codeElement.getChildText("adminCode1"));
+			address.setAdminName2(codeElement.getChildText("adminName2"));
+			address.setAdminCode2(codeElement.getChildText("adminCode2"));
+			address.setAdminName3(codeElement.getChildText("adminName3"));
+			address.setAdminCode3(codeElement.getChildText("adminCode3"));
+
+			address.setDistance(Double.parseDouble(codeElement
+					.getChildText("distance")));
+
+			return address;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns location lat/lng and admin information for a given address.
+	 * 
+	 * See documentation for the list of supported countries:
+	 * 
+	 * 	 * @see <a href="http://www.geonames.org/maps/addresses.html#geoCodeAddress">geoCodeAddress
+	 *      web service documentation</a>
+	 * 
+	 * @param q
+	 * @param country
+	 * @param postalcode
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static Address geoCodeAddress(String q, String country, String postalcode)
+			throws IOException, Exception {
+
+		String url = "/geoCodeAddress?";
+
+		url = url + "&q=" + URLEncoder.encode(q, "UTF8");
+		if (country != null && !country.isEmpty()) {
+		url = url + "&country=" + country;
+		}
+		if (postalcode != null && !postalcode.isEmpty()) {
+			url = url + "&postalcode=" + URLEncoder.encode(postalcode, "UTF8");			
+		}
+		url = addUserName(url);
+
+		Element root = connectAndParse(url);
+		for (Object obj : root.getChildren("address")) {
+			Element codeElement = (Element) obj;
+			Address address = new Address();
+			address.setStreet(codeElement.getChildText("street"));
+			address.setStreetNumber(codeElement.getChildText("houseNumber"));
+
+			address.setPostalCode(codeElement.getChildText("postalcode"));
+			address.setPlaceName(codeElement.getChildText("locality"));
+			address.setCountryCode(codeElement.getChildText("countryCode"));
+
+			address.setLatitude(Double.parseDouble(codeElement
+					.getChildText("lat")));
+			address.setLongitude(Double.parseDouble(codeElement
+					.getChildText("lng")));
+
+			address.setAdminName1(codeElement.getChildText("adminName1"));
+			address.setAdminCode1(codeElement.getChildText("adminCode1"));
+			address.setAdminName2(codeElement.getChildText("adminName2"));
+			address.setAdminCode2(codeElement.getChildText("adminCode2"));
+			address.setAdminName3(codeElement.getChildText("adminName3"));
+			address.setAdminCode3(codeElement.getChildText("adminCode3"));
+
+			return address;
+		}
+
+		return null;
+	}
 	/**
 	 * convenience method for {@link #search(ToponymSearchCriteria)}
 	 * 
