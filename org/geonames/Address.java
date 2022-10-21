@@ -23,12 +23,28 @@ package org.geonames;
  * 
  */
 public class Address extends PostalCode {
+	
+	private String sourceId;
 
 	private String street;
 
 	private String streetNumber;
 
 	private String mtfcc;
+
+	/**
+	 * @return the sourceId
+	 */
+	public String getSourceId() {
+		return sourceId;
+	}
+
+	/**
+	 * @param sourceId the sourceId to set
+	 */
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
 
 	/**
 	 * @return the street

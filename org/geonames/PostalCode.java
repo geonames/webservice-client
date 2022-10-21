@@ -46,6 +46,10 @@ public class PostalCode {
 
 	private String adminCode3;
 
+	private String adminName4;
+
+	private String adminCode4;
+
 	private double distance;
 
 	/**
@@ -56,8 +60,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param distance
-	 *            The distance to set.
+	 * @param distance The distance to set.
 	 */
 	public void setDistance(double distance) {
 		this.distance = distance;
@@ -71,8 +74,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminCode1
-	 *            The adminCode1 to set.
+	 * @param adminCode1 The adminCode1 to set.
 	 */
 	public void setAdminCode1(String adminCode1) {
 		this.adminCode1 = adminCode1;
@@ -86,8 +88,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminCode2
-	 *            The adminCode2 to set.
+	 * @param adminCode2 The adminCode2 to set.
 	 */
 	public void setAdminCode2(String adminCode2) {
 		this.adminCode2 = adminCode2;
@@ -101,8 +102,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminName1
-	 *            The adminName1 to set.
+	 * @param adminName1 The adminName1 to set.
 	 */
 	public void setAdminName1(String adminName1) {
 		this.adminName1 = adminName1;
@@ -116,8 +116,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminName2
-	 *            The adminName2 to set.
+	 * @param adminName2 The adminName2 to set.
 	 */
 	public void setAdminName2(String adminName2) {
 		this.adminName2 = adminName2;
@@ -131,8 +130,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminName3
-	 *            the adminName3 to set
+	 * @param adminName3 the adminName3 to set
 	 */
 	public void setAdminName3(String adminName3) {
 		this.adminName3 = adminName3;
@@ -146,11 +144,38 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param adminCode3
-	 *            the adminCode3 to set
+	 * @param adminCode3 the adminCode3 to set
 	 */
 	public void setAdminCode3(String adminCode3) {
 		this.adminCode3 = adminCode3;
+	}
+
+	/**
+	 * @return the adminName4
+	 */
+	public String getAdminName4() {
+		return adminName4;
+	}
+
+	/**
+	 * @param adminName4 the adminName4 to set
+	 */
+	public void setAdminName4(String adminName4) {
+		this.adminName4 = adminName4;
+	}
+
+	/**
+	 * @return the adminCode4
+	 */
+	public String getAdminCode4() {
+		return adminCode4;
+	}
+
+	/**
+	 * @param adminCode4 the adminCode4 to set
+	 */
+	public void setAdminCode4(String adminCode4) {
+		this.adminCode4 = adminCode4;
 	}
 
 	/**
@@ -161,8 +186,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param countryCode
-	 *            The ISO 3166-1-alpha-2 countryCode to set.
+	 * @param countryCode The ISO 3166-1-alpha-2 countryCode to set.
 	 */
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
@@ -178,8 +202,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param latitude
-	 *            The latitude to set.
+	 * @param latitude The latitude to set.
 	 */
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
@@ -195,8 +218,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param longitude
-	 *            The longitude to set.
+	 * @param longitude The longitude to set.
 	 */
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
@@ -210,8 +232,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param placeName
-	 *            The placeName to set.
+	 * @param placeName The placeName to set.
 	 */
 	public void setPlaceName(String placeName) {
 		this.placeName = placeName;
@@ -225,8 +246,7 @@ public class PostalCode {
 	}
 
 	/**
-	 * @param postalCode
-	 *            The postalCode to set.
+	 * @param postalCode The postalCode to set.
 	 */
 	public void setPostalCode(String postalCode) {
 		this.postalCode = postalCode;

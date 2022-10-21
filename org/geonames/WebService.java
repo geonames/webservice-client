@@ -41,8 +41,8 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 /**
- * provides static methods to access the <a
- * href="http://www.geonames.org/export/ws-overview.html">GeoNames web
+ * provides static methods to access the
+ * <a href="http://www.geonames.org/export/ws-overview.html">GeoNames web
  * services</a>.
  * <p>
  * Note : values for some fields are only returned with sufficient {@link Style}
@@ -57,7 +57,7 @@ public class WebService {
 
 	private static Logger logger = Logger.getLogger("org.geonames");
 
-	private static String USER_AGENT = "gnwsc/1.1.14";
+	private static String USER_AGENT = "gnwsc/1.1.16";
 
 	private static boolean isAndroid = false;
 
@@ -130,8 +130,8 @@ public class WebService {
 	private static String userName;
 
 	/**
-	 * token to pass to as optional authentication parameter to the commercial
-	 * web services.
+	 * token to pass to as optional authentication parameter to the commercial web
+	 * services.
 	 */
 	private static String token;
 
@@ -167,11 +167,11 @@ public class WebService {
 	}
 
 	/**
-	 * returns the currently active server. Normally this is the main server, if
-	 * the main server recently failed then the failover server is returned. If
-	 * the main server is not available we don't want to try with every request
-	 * whether it is available again. We switch to the failover server and try
-	 * from time to time whether the main server is again accessible.
+	 * returns the currently active server. Normally this is the main server, if the
+	 * main server recently failed then the failover server is returned. If the main
+	 * server is not available we don't want to try with every request whether it is
+	 * available again. We switch to the failover server and try from time to time
+	 * whether the main server is again accessible.
 	 * 
 	 * @return
 	 */
@@ -207,12 +207,11 @@ public class WebService {
 
 	/**
 	 * opens the connection to the url and sets the user agent. In case of an
-	 * IOException it checks whether a failover server is set and connects to
-	 * the failover server if it has been defined and if it is different from
-	 * the normal server.
+	 * IOException it checks whether a failover server is set and connects to the
+	 * failover server if it has been defined and if it is different from the normal
+	 * server.
 	 * 
-	 * @param url
-	 *            the url to connect to
+	 * @param url the url to connect to
 	 * @return returns the inputstream for the connection
 	 * @throws IOException
 	 */
@@ -223,11 +222,9 @@ public class WebService {
 			long begin = System.currentTimeMillis();
 			HttpURLConnection httpConnection = null;
 			if (proxy == null) {
-				httpConnection = (HttpURLConnection) new URL(
-						currentlyActiveServer + url).openConnection();
+				httpConnection = (HttpURLConnection) new URL(currentlyActiveServer + url).openConnection();
 			} else {
-				httpConnection = (HttpURLConnection) new URL(
-						currentlyActiveServer + url).openConnection(proxy);
+				httpConnection = (HttpURLConnection) new URL(currentlyActiveServer + url).openConnection(proxy);
 			}
 			httpConnection.setConnectTimeout(connectTimeOut);
 			httpConnection.setReadTimeout(readTimeOut);
@@ -237,14 +234,10 @@ public class WebService {
 
 			if (status == 200) {
 				long elapsedTime = System.currentTimeMillis() - begin;
-				averageConnectTime = (averageConnectTime
-						* (averageSampleSize - 1) + elapsedTime)
-						/ averageSampleSize;
+				averageConnectTime = (averageConnectTime * (averageSampleSize - 1) + elapsedTime) / averageSampleSize;
 				// if the average elapsed time is too long we switch server
-				if (geoNamesServerFailover != null
-						&& averageConnectTime > 5000
-						&& !currentlyActiveServer
-								.equals(geoNamesServerFailover)) {
+				if (geoNamesServerFailover != null && averageConnectTime > 5000
+						&& !currentlyActiveServer.equals(geoNamesServerFailover)) {
 					timeOfLastFailureMainServer = System.currentTimeMillis();
 				}
 				return in;
@@ -253,21 +246,17 @@ public class WebService {
 			return tryFailoverServer(url, currentlyActiveServer, 0, e);
 		}
 		// we only get here if we had a statuscode <> 200
-		IOException ioException = new IOException("status code " + status
-				+ " for " + url);
-		return tryFailoverServer(url, currentlyActiveServer, status,
-				ioException);
+		IOException ioException = new IOException("status code " + status + " for " + url);
+		return tryFailoverServer(url, currentlyActiveServer, status, ioException);
 	}
 
-	private static synchronized InputStream tryFailoverServer(String url,
-			String currentlyActiveServer, int status, IOException e)
-			throws MalformedURLException, IOException {
+	private static synchronized InputStream tryFailoverServer(String url, String currentlyActiveServer, int status,
+			IOException e) throws MalformedURLException, IOException {
 		// we cannot reach the server
-		logger.log(Level.WARNING, "problems connecting to geonames server "
-				+ currentlyActiveServer, e);
+		logger.log(Level.WARNING, "problems connecting to geonames server " + currentlyActiveServer, e);
 		// is a failover server defined?
 		if (geoNamesServerFailover == null
-		// is it different from the one we are using?
+				// is it different from the one we are using?
 				|| currentlyActiveServer.equals(geoNamesServerFailover)) {
 			if (currentlyActiveServer.equals(geoNamesServerFailover)) {
 				// failover server is not accessible, we throw exception
@@ -277,8 +266,7 @@ public class WebService {
 			throw e;
 		}
 		timeOfLastFailureMainServer = System.currentTimeMillis();
-		logger.info("trying to connect to failover server "
-				+ geoNamesServerFailover);
+		logger.info("trying to connect to failover server " + geoNamesServerFailover);
 		// try failover server
 		URLConnection conn = null;
 		if (proxy == null) {
@@ -296,23 +284,17 @@ public class WebService {
 		return in;
 	}
 
-	private static Element connectAndParse(String url)
-			throws GeoNamesException, IOException, JDOMException {
+	private static Element connectAndParse(String url) throws GeoNamesException, IOException, JDOMException {
 		SAXBuilder parser = new SAXBuilder();
 		Document doc = parser.build(connect(url));
 		try {
 			Element root = rootAndCheckException(doc);
 			return root;
 		} catch (GeoNamesException geoNamesException) {
-			if (geoNamesException.getExceptionCode() == 13
-					|| (geoNamesException.getMessage() != null && geoNamesException
-							.getMessage()
-							.indexOf(
-									"canceling statement due to statement timeout") > -1)) {
+			if (geoNamesException.getExceptionCode() == 13 || (geoNamesException.getMessage() != null
+					&& geoNamesException.getMessage().indexOf("canceling statement due to statement timeout") > -1)) {
 				String currentlyActiveServer = getCurrentlyActiveServer();
-				if (geoNamesServerFailover != null
-						&& !currentlyActiveServer
-								.equals(geoNamesServerFailover)) {
+				if (geoNamesServerFailover != null && !currentlyActiveServer.equals(geoNamesServerFailover)) {
 					timeOfLastFailureMainServer = System.currentTimeMillis();
 					doc = parser.build(connect(url));
 					Element root = rootAndCheckException(doc);
@@ -323,8 +305,7 @@ public class WebService {
 		}
 	}
 
-	private static Element rootAndCheckException(Document doc)
-			throws GeoNamesException {
+	private static Element rootAndCheckException(Document doc) throws GeoNamesException {
 		Element root = doc.getRootElement();
 		checkException(root);
 		return root;
@@ -338,8 +319,7 @@ public class WebService {
 				code = Integer.parseInt(message.getAttributeValue("value"));
 			} catch (NumberFormatException numberFormatException) {
 			}
-			throw new GeoNamesException(code,
-					message.getAttributeValue("message"));
+			throw new GeoNamesException(code, message.getAttributeValue("message"));
 		}
 	}
 
@@ -355,8 +335,7 @@ public class WebService {
 		if (line.startsWith("ERR:")) {
 			String[] terms = line.split(":");
 			if (terms.length == 3) {
-				throw new GeoNamesException(Integer.parseInt(terms[1]),
-						terms[2]);
+				throw new GeoNamesException(Integer.parseInt(terms[1]), terms[2]);
 			}
 			throw new GeoNamesException("unhandled exception");
 		}
@@ -366,11 +345,10 @@ public class WebService {
 		Toponym toponym = new Toponym();
 
 		toponym.setName(toponymElement.getChildText("name"));
+		toponym.setAsciiName(toponymElement.getChildText("asciiName"));
 		toponym.setAlternateNames(toponymElement.getChildText("alternateNames"));
-		toponym.setLatitude(Double.parseDouble(toponymElement
-				.getChildText("lat")));
-		toponym.setLongitude(Double.parseDouble(toponymElement
-				.getChildText("lng")));
+		toponym.setLatitude(Double.parseDouble(toponymElement.getChildText("lat")));
+		toponym.setLongitude(Double.parseDouble(toponymElement.getChildText("lng")));
 
 		String geonameId = toponymElement.getChildText("geonameId");
 		if (geonameId != null) {
@@ -381,8 +359,7 @@ public class WebService {
 		toponym.setCountryCode(toponymElement.getChildText("countryCode"));
 		toponym.setCountryName(toponymElement.getChildText("countryName"));
 
-		toponym.setFeatureClass(FeatureClass.fromValue(toponymElement
-				.getChildText("fcl")));
+		toponym.setFeatureClass(FeatureClass.fromValue(toponymElement.getChildText("fcl")));
 		toponym.setFeatureCode(toponymElement.getChildText("fcode"));
 
 		toponym.setFeatureClassName(toponymElement.getChildText("fclName"));
@@ -412,17 +389,14 @@ public class WebService {
 		if (timezoneElement != null) {
 			Timezone timezone = new Timezone();
 			timezone.setTimezoneId(timezoneElement.getValue());
-			timezone.setDstOffset(Double.parseDouble(timezoneElement
-					.getAttributeValue("dstOffset")));
-			timezone.setGmtOffset(Double.parseDouble(timezoneElement
-					.getAttributeValue("gmtOffset")));
+			timezone.setDstOffset(Double.parseDouble(timezoneElement.getAttributeValue("dstOffset")));
+			timezone.setGmtOffset(Double.parseDouble(timezoneElement.getAttributeValue("gmtOffset")));
 			toponym.setTimezone(timezone);
 		}
 
 		Element bboxElement = toponymElement.getChild("bbox");
 		if (bboxElement != null) {
-			BoundingBox boundingBox = new BoundingBox(
-					Double.parseDouble(bboxElement.getChildText("west")),
+			BoundingBox boundingBox = new BoundingBox(Double.parseDouble(bboxElement.getChildText("west")),
 					Double.parseDouble(bboxElement.getChildText("east")),
 					Double.parseDouble(bboxElement.getChildText("south")),
 					Double.parseDouble(bboxElement.getChildText("north")));
@@ -432,29 +406,19 @@ public class WebService {
 		return toponym;
 	}
 
-	private static WikipediaArticle getWikipediaArticleFromElement(
-			Element wikipediaArticleElement) {
+	private static WikipediaArticle getWikipediaArticleFromElement(Element wikipediaArticleElement) {
 		WikipediaArticle wikipediaArticle = new WikipediaArticle();
-		wikipediaArticle.setLanguage(wikipediaArticleElement
-				.getChildText("lang"));
-		wikipediaArticle
-				.setTitle(wikipediaArticleElement.getChildText("title"));
-		wikipediaArticle.setSummary(wikipediaArticleElement
-				.getChildText("summary"));
-		wikipediaArticle.setFeature(wikipediaArticleElement
-				.getChildText("feature"));
-		wikipediaArticle.setWikipediaUrl(wikipediaArticleElement
-				.getChildText("wikipediaUrl"));
-		wikipediaArticle.setThumbnailImg(wikipediaArticleElement
-				.getChildText("thumbnailImg"));
+		wikipediaArticle.setLanguage(wikipediaArticleElement.getChildText("lang"));
+		wikipediaArticle.setTitle(wikipediaArticleElement.getChildText("title"));
+		wikipediaArticle.setSummary(wikipediaArticleElement.getChildText("summary"));
+		wikipediaArticle.setFeature(wikipediaArticleElement.getChildText("feature"));
+		wikipediaArticle.setWikipediaUrl(wikipediaArticleElement.getChildText("wikipediaUrl"));
+		wikipediaArticle.setThumbnailImg(wikipediaArticleElement.getChildText("thumbnailImg"));
 
-		wikipediaArticle.setLatitude(Double.parseDouble(wikipediaArticleElement
-				.getChildText("lat")));
-		wikipediaArticle.setLongitude(Double
-				.parseDouble(wikipediaArticleElement.getChildText("lng")));
+		wikipediaArticle.setLatitude(Double.parseDouble(wikipediaArticleElement.getChildText("lat")));
+		wikipediaArticle.setLongitude(Double.parseDouble(wikipediaArticleElement.getChildText("lng")));
 
-		wikipediaArticle.setRank(Integer.parseInt(wikipediaArticleElement
-				.getChildText("rank")));
+		wikipediaArticle.setRank(Integer.parseInt(wikipediaArticleElement.getChildText("rank")));
 
 		String population = wikipediaArticleElement.getChildText("population");
 		if (population != null && !"".equals(population)) {
@@ -470,32 +434,23 @@ public class WebService {
 
 	private static TimeZone utc = TimeZone.getTimeZone("UTC");
 
-	private static WeatherObservation getWeatherObservationFromElement(
-			Element weatherObservationElement) throws ParseException {
+	private static WeatherObservation getWeatherObservationFromElement(Element weatherObservationElement)
+			throws ParseException {
 		WeatherObservation weatherObservation = new WeatherObservation();
-		weatherObservation.setObservation(weatherObservationElement
-				.getChildText("observation"));
+		weatherObservation.setObservation(weatherObservationElement.getChildText("observation"));
 		SimpleDateFormat df = new SimpleDateFormat(DATEFMT);
 		df.setTimeZone(utc);
-		weatherObservation.setObservationTime(df
-				.parse(weatherObservationElement
-						.getChildText("observationTime")));
-		weatherObservation.setStationName(weatherObservationElement
-				.getChildText("stationName"));
-		weatherObservation.setIcaoCode(weatherObservationElement
-				.getChildText("ICAO"));
-		weatherObservation.setCountryCode(weatherObservationElement
-				.getChildText("countryCode"));
+		weatherObservation.setObservationTime(df.parse(weatherObservationElement.getChildText("observationTime")));
+		weatherObservation.setStationName(weatherObservationElement.getChildText("stationName"));
+		weatherObservation.setIcaoCode(weatherObservationElement.getChildText("ICAO"));
+		weatherObservation.setCountryCode(weatherObservationElement.getChildText("countryCode"));
 		String elevation = weatherObservationElement.getChildText("elevation");
 		if (elevation != null && !"".equals(elevation)) {
 			weatherObservation.setElevation(Integer.parseInt(elevation));
 		}
-		weatherObservation.setLatitude(Double
-				.parseDouble(weatherObservationElement.getChildText("lat")));
-		weatherObservation.setLongitude(Double
-				.parseDouble(weatherObservationElement.getChildText("lng")));
-		String temperature = weatherObservationElement
-				.getChildText("temperature");
+		weatherObservation.setLatitude(Double.parseDouble(weatherObservationElement.getChildText("lat")));
+		weatherObservation.setLongitude(Double.parseDouble(weatherObservationElement.getChildText("lng")));
+		String temperature = weatherObservationElement.getChildText("temperature");
 		if (temperature != null && !"".equals(temperature)) {
 			weatherObservation.setTemperature(Double.parseDouble(temperature));
 		}
@@ -507,19 +462,16 @@ public class WebService {
 		if (humidity != null && !"".equals(humidity)) {
 			weatherObservation.setHumidity(Double.parseDouble(humidity));
 		}
-		weatherObservation.setClouds(weatherObservationElement
-				.getChildText("clouds"));
-		weatherObservation.setWeatherCondition(weatherObservationElement
-				.getChildText("weatherCondition"));
-		weatherObservation.setWindSpeed(weatherObservationElement
-				.getChildText("windSpeed"));
+		weatherObservation.setClouds(weatherObservationElement.getChildText("clouds"));
+		weatherObservation.setWeatherCondition(weatherObservationElement.getChildText("weatherCondition"));
+		weatherObservation.setWindSpeed(weatherObservationElement.getChildText("windSpeed"));
 		return weatherObservation;
 
 	}
 
 	/**
-	 * returns a list of postal codes for the given parameters. This method is
-	 * for convenience.
+	 * returns a list of postal codes for the given parameters. This method is for
+	 * convenience.
 	 * 
 	 * @param postalCode
 	 * @param placeName
@@ -527,8 +479,8 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<PostalCode> postalCodeSearch(String postalCode,
-			String placeName, String countryCode) throws Exception {
+	public static List<PostalCode> postalCodeSearch(String postalCode, String placeName, String countryCode)
+			throws Exception {
 		PostalCodeSearchCriteria postalCodeSearchCriteria = new PostalCodeSearchCriteria();
 		postalCodeSearchCriteria.setPostalCode(postalCode);
 		postalCodeSearchCriteria.setPlaceName(placeName);
@@ -537,38 +489,29 @@ public class WebService {
 	}
 
 	/**
-	 * returns a list of postal codes for the given search criteria matching a
-	 * full text search on the GeoNames postal codes database.
+	 * returns a list of postal codes for the given search criteria matching a full
+	 * text search on the GeoNames postal codes database.
 	 * 
 	 * @param postalCodeSearchCriteria
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<PostalCode> postalCodeSearch(
-			PostalCodeSearchCriteria postalCodeSearchCriteria) throws Exception {
+	public static List<PostalCode> postalCodeSearch(PostalCodeSearchCriteria postalCodeSearchCriteria)
+			throws Exception {
 		List<PostalCode> postalCodes = new ArrayList<PostalCode>();
 
 		String url = "/postalCodeSearch?";
 		if (postalCodeSearchCriteria.getPostalCode() != null) {
-			url = url
-					+ "postalcode="
-					+ URLEncoder.encode(
-							postalCodeSearchCriteria.getPostalCode(), "UTF8");
+			url = url + "postalcode=" + URLEncoder.encode(postalCodeSearchCriteria.getPostalCode(), "UTF8");
 		}
 		if (postalCodeSearchCriteria.getPlaceName() != null) {
 			if (!url.endsWith("&")) {
 				url = url + "&";
 			}
-			url = url
-					+ "placename="
-					+ URLEncoder.encode(
-							postalCodeSearchCriteria.getPlaceName(), "UTF8");
+			url = url + "placename=" + URLEncoder.encode(postalCodeSearchCriteria.getPlaceName(), "UTF8");
 		}
 		if (postalCodeSearchCriteria.getAdminCode1() != null) {
-			url = url
-					+ "&adminCode1="
-					+ URLEncoder.encode(
-							postalCodeSearchCriteria.getAdminCode1(), "UTF8");
+			url = url + "&adminCode1=" + URLEncoder.encode(postalCodeSearchCriteria.getAdminCode1(), "UTF8");
 		}
 
 		if (postalCodeSearchCriteria.getCountryCode() != null) {
@@ -581,8 +524,7 @@ public class WebService {
 			if (!url.endsWith("&")) {
 				url = url + "&";
 			}
-			url = url + "countryBias="
-					+ postalCodeSearchCriteria.getCountryBias();
+			url = url + "countryBias=" + postalCodeSearchCriteria.getCountryBias();
 		}
 		if (postalCodeSearchCriteria.getMaxRows() > 0) {
 			url = url + "&maxRows=" + postalCodeSearchCriteria.getMaxRows();
@@ -594,18 +536,13 @@ public class WebService {
 			url = url + "&operator=OR";
 		}
 		if (postalCodeSearchCriteria.isReduced() != null) {
-			url = url + "&isReduced="
-					+ postalCodeSearchCriteria.isReduced().toString();
+			url = url + "&isReduced=" + postalCodeSearchCriteria.isReduced().toString();
 		}
 		if (postalCodeSearchCriteria.getBoundingBox() != null) {
-			url = url + "&east="
-					+ postalCodeSearchCriteria.getBoundingBox().getEast();
-			url = url + "&west="
-					+ postalCodeSearchCriteria.getBoundingBox().getWest();
-			url = url + "&north="
-					+ postalCodeSearchCriteria.getBoundingBox().getNorth();
-			url = url + "&south="
-					+ postalCodeSearchCriteria.getBoundingBox().getSouth();
+			url = url + "&east=" + postalCodeSearchCriteria.getBoundingBox().getEast();
+			url = url + "&west=" + postalCodeSearchCriteria.getBoundingBox().getWest();
+			url = url + "&north=" + postalCodeSearchCriteria.getBoundingBox().getNorth();
+			url = url + "&south=" + postalCodeSearchCriteria.getBoundingBox().getSouth();
 		}
 
 		url = addUserName(url);
@@ -627,23 +564,17 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<PostalCode> findNearbyPostalCodes(
-			PostalCodeSearchCriteria postalCodeSearchCriteria) throws Exception {
+	public static List<PostalCode> findNearbyPostalCodes(PostalCodeSearchCriteria postalCodeSearchCriteria)
+			throws Exception {
 
 		List<PostalCode> postalCodes = new ArrayList<PostalCode>();
 
 		String url = "/findNearbyPostalCodes?";
 		if (postalCodeSearchCriteria.getPostalCode() != null) {
-			url = url
-					+ "&postalcode="
-					+ URLEncoder.encode(
-							postalCodeSearchCriteria.getPostalCode(), "UTF8");
+			url = url + "&postalcode=" + URLEncoder.encode(postalCodeSearchCriteria.getPostalCode(), "UTF8");
 		}
 		if (postalCodeSearchCriteria.getPlaceName() != null) {
-			url = url
-					+ "&placename="
-					+ URLEncoder.encode(
-							postalCodeSearchCriteria.getPlaceName(), "UTF8");
+			url = url + "&placename=" + URLEncoder.encode(postalCodeSearchCriteria.getPlaceName(), "UTF8");
 		}
 		if (postalCodeSearchCriteria.getCountryCode() != null) {
 			url = url + "&country=" + postalCodeSearchCriteria.getCountryCode();
@@ -672,8 +603,7 @@ public class WebService {
 			Element codeElement = (Element) obj;
 			PostalCode code = getPostalCodeFromElement(codeElement);
 			if (codeElement.getChildText("distance") != null) {
-				code.setDistance(Double.parseDouble(codeElement
-						.getChildText("distance")));
+				code.setDistance(Double.parseDouble(codeElement.getChildText("distance")));
 			}
 			postalCodes.add(code);
 		}
@@ -681,8 +611,7 @@ public class WebService {
 		return postalCodes;
 	}
 
-	private static PostalCode getPostalCodeFromElement(Element codeElement)
-			throws ParseException {
+	private static PostalCode getPostalCodeFromElement(Element codeElement) throws ParseException {
 		PostalCode code = new PostalCode();
 		code.setPostalCode(codeElement.getChildText("postalcode"));
 		code.setPlaceName(codeElement.getChildText("name"));
@@ -701,8 +630,7 @@ public class WebService {
 	}
 
 	/**
-	 * convenience method for
-	 * {@link #findNearbyPlaceName(double,double,double,int)}
+	 * convenience method for {@link #findNearbyPlaceName(double,double,double,int)}
 	 * 
 	 * @param latitude
 	 * @param longitude
@@ -710,14 +638,12 @@ public class WebService {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static List<Toponym> findNearbyPlaceName(double latitude,
-			double longitude) throws IOException, Exception {
+	public static List<Toponym> findNearbyPlaceName(double latitude, double longitude) throws IOException, Exception {
 		return findNearbyPlaceName(latitude, longitude, 0, 0);
 	}
 
-	public static List<Toponym> findNearbyPlaceName(double latitude,
-			double longitude, double radius, int maxRows) throws IOException,
-			Exception {
+	public static List<Toponym> findNearbyPlaceName(double latitude, double longitude, double radius, int maxRows)
+			throws IOException, Exception {
 		List<Toponym> places = new ArrayList<Toponym>();
 
 		String url = "/findNearbyPlaceName?";
@@ -743,11 +669,9 @@ public class WebService {
 		return places;
 	}
 
-	public static List<Toponym> findNearby(double latitude, double longitude,
-			FeatureClass featureClass, String[] featureCodes)
-			throws IOException, Exception {
-		return findNearby(latitude, longitude, 0, featureClass, featureCodes,
-				null, 0);
+	public static List<Toponym> findNearby(double latitude, double longitude, FeatureClass featureClass,
+			String[] featureCodes) throws IOException, Exception {
+		return findNearby(latitude, longitude, 0, featureClass, featureCodes, null, 0);
 	}
 
 	/* Overload function to allow backward compatibility */
@@ -768,9 +692,8 @@ public class WebService {
 	 * @return: list of wikipedia articles
 	 * @throws: Exception
 	 */
-	public static List<Toponym> findNearby(double latitude, double longitude,
-			double radius, FeatureClass featureClass, String[] featureCodes,
-			String language, int maxRows) throws IOException, Exception {
+	public static List<Toponym> findNearby(double latitude, double longitude, double radius, FeatureClass featureClass,
+			String[] featureCodes, String language, int maxRows) throws IOException, Exception {
 		List<Toponym> places = new ArrayList<Toponym>();
 
 		String url = "/findNearby?";
@@ -813,16 +736,13 @@ public class WebService {
 	/**
 	 * 
 	 * @param geoNameId
-	 * @param language
-	 *            - optional
-	 * @param style
-	 *            - optional
+	 * @param language  - optional
+	 * @param style     - optional
 	 * @return the toponym for the geoNameId
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static Toponym get(int geoNameId, String language, String style)
-			throws IOException, Exception {
+	public static Toponym get(int geoNameId, String language, String style) throws IOException, Exception {
 		String url = "/get?";
 
 		url += "geonameId=" + geoNameId;
@@ -852,8 +772,7 @@ public class WebService {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static Address findNearestAddress(double latitude, double longitude)
-			throws IOException, Exception {
+	public static Address findNearestAddress(double latitude, double longitude) throws IOException, Exception {
 
 		String url = "/findNearestAddress?";
 
@@ -873,18 +792,19 @@ public class WebService {
 			address.setPlaceName(codeElement.getChildText("placename"));
 			address.setCountryCode(codeElement.getChildText("countryCode"));
 
-			address.setLatitude(Double.parseDouble(codeElement
-					.getChildText("lat")));
-			address.setLongitude(Double.parseDouble(codeElement
-					.getChildText("lng")));
+			address.setLatitude(Double.parseDouble(codeElement.getChildText("lat")));
+			address.setLongitude(Double.parseDouble(codeElement.getChildText("lng")));
 
 			address.setAdminName1(codeElement.getChildText("adminName1"));
 			address.setAdminCode1(codeElement.getChildText("adminCode1"));
 			address.setAdminName2(codeElement.getChildText("adminName2"));
 			address.setAdminCode2(codeElement.getChildText("adminCode2"));
+			address.setAdminName3(codeElement.getChildText("adminName3"));
+			address.setAdminCode3(codeElement.getChildText("adminCode3"));
+			address.setAdminName4(codeElement.getChildText("adminName4"));
+			address.setAdminCode4(codeElement.getChildText("adminCode4"));
 
-			address.setDistance(Double.parseDouble(codeElement
-					.getChildText("distance")));
+			address.setDistance(Double.parseDouble(codeElement.getChildText("distance")));
 
 			return address;
 		}
@@ -892,13 +812,12 @@ public class WebService {
 		return null;
 	}
 
-	public static Intersection findNearestIntersection(double latitude,
-			double longitude) throws Exception {
+	public static Intersection findNearestIntersection(double latitude, double longitude) throws Exception {
 		return findNearestIntersection(latitude, longitude, 0);
 	}
 
-	public static Intersection findNearestIntersection(double latitude,
-			double longitude, double radius) throws Exception {
+	public static Intersection findNearestIntersection(double latitude, double longitude, double radius)
+			throws Exception {
 
 		String url = "/findNearestIntersection?";
 
@@ -916,10 +835,8 @@ public class WebService {
 			intersection.setStreet1(e.getChildText("street1"));
 			intersection.setStreet2(e.getChildText("street2"));
 			intersection.setLatitude(Double.parseDouble(e.getChildText("lat")));
-			intersection
-					.setLongitude(Double.parseDouble(e.getChildText("lng")));
-			intersection.setDistance(Double.parseDouble(e
-					.getChildText("distance")));
+			intersection.setLongitude(Double.parseDouble(e.getChildText("lng")));
+			intersection.setDistance(Double.parseDouble(e.getChildText("distance")));
 			intersection.setPostalCode(e.getChildText("postalcode"));
 			intersection.setPlaceName(e.getChildText("placename"));
 			intersection.setCountryCode(e.getChildText("countryCode"));
@@ -934,8 +851,8 @@ public class WebService {
 	/**
 	 * 
 	 * @see <a * href=
-	 *      "http://www.geonames.org/maps/reverse-geocoder.html#findNearbyStreets"
-	 *      > web service documentation</a>
+	 *      "http://www.geonames.org/maps/reverse-geocoder.html#findNearbyStreets" >
+	 *      web service documentation</a>
 	 * 
 	 * @param latitude
 	 * @param longitude
@@ -943,8 +860,8 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<StreetSegment> findNearbyStreets(double latitude,
-			double longitude, double radius) throws Exception {
+	public static List<StreetSegment> findNearbyStreets(double latitude, double longitude, double radius)
+			throws Exception {
 
 		String url = "/findNearbyStreets?";
 
@@ -988,8 +905,8 @@ public class WebService {
 		return segments;
 	}
 
-	public static List<StreetSegment> findNearbyStreetsOSM(double latitude,
-			double longitude, double radius) throws Exception {
+	public static List<StreetSegment> findNearbyStreetsOSM(double latitude, double longitude, double radius)
+			throws Exception {
 
 		String url = "/findNearbyStreetsOSM?";
 
@@ -1021,24 +938,8 @@ public class WebService {
 		}
 		return segments;
 	}
-	
-	/**
-	 * Find the nearest address for a given lat/lng pair. Supports several countries.
-	 * 
-	 * See documentation for the list of supported countries:
-	 * 
-	 * 	 * @see <a href="http://www.geonames.org/maps/addresses.html#address">address
-	 *      web service documentation</a>
-	 *
-	 *
-	 * @param latitude
-	 * @param longitude
-	 * @return
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public static Address address(double latitude, double longitude)
-			throws IOException, Exception {
+
+	public static Address address(double latitude, double longitude) throws IOException, Exception {
 
 		String url = "/address?";
 
@@ -1057,10 +958,8 @@ public class WebService {
 			address.setPlaceName(codeElement.getChildText("locality"));
 			address.setCountryCode(codeElement.getChildText("countryCode"));
 
-			address.setLatitude(Double.parseDouble(codeElement
-					.getChildText("lat")));
-			address.setLongitude(Double.parseDouble(codeElement
-					.getChildText("lng")));
+			address.setLatitude(Double.parseDouble(codeElement.getChildText("lat")));
+			address.setLongitude(Double.parseDouble(codeElement.getChildText("lng")));
 
 			address.setAdminName1(codeElement.getChildText("adminName1"));
 			address.setAdminCode1(codeElement.getChildText("adminCode1"));
@@ -1069,8 +968,9 @@ public class WebService {
 			address.setAdminName3(codeElement.getChildText("adminName3"));
 			address.setAdminCode3(codeElement.getChildText("adminCode3"));
 
-			address.setDistance(Double.parseDouble(codeElement
-					.getChildText("distance")));
+			address.setSourceId(codeElement.getChildText("sourceId"));
+
+			address.setDistance(Double.parseDouble(codeElement.getChildText("distance")));
 
 			return address;
 		}
@@ -1078,32 +978,16 @@ public class WebService {
 		return null;
 	}
 
-	/**
-	 * Returns location lat/lng and admin information for a given address.
-	 * 
-	 * See documentation for the list of supported countries:
-	 * 
-	 * 	 * @see <a href="http://www.geonames.org/maps/addresses.html#geoCodeAddress">geoCodeAddress
-	 *      web service documentation</a>
-	 * 
-	 * @param q
-	 * @param country
-	 * @param postalcode
-	 * @return
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public static Address geoCodeAddress(String q, String country, String postalcode)
-			throws IOException, Exception {
+	public static Address geoCodeAddress(String q, String country, String postalcode) throws IOException, Exception {
 
 		String url = "/geoCodeAddress?";
 
 		url = url + "&q=" + URLEncoder.encode(q, "UTF8");
 		if (country != null && !country.isEmpty()) {
-		url = url + "&country=" + country;
+			url = url + "&country=" + country;
 		}
 		if (postalcode != null && !postalcode.isEmpty()) {
-			url = url + "&postalcode=" + URLEncoder.encode(postalcode, "UTF8");			
+			url = url + "&postalcode=" + URLEncoder.encode(postalcode, "UTF8");
 		}
 		url = addUserName(url);
 
@@ -1111,6 +995,7 @@ public class WebService {
 		for (Object obj : root.getChildren("address")) {
 			Element codeElement = (Element) obj;
 			Address address = new Address();
+			address.setSourceId(codeElement.getChildText("sourceId"));
 			address.setStreet(codeElement.getChildText("street"));
 			address.setStreetNumber(codeElement.getChildText("houseNumber"));
 
@@ -1118,10 +1003,8 @@ public class WebService {
 			address.setPlaceName(codeElement.getChildText("locality"));
 			address.setCountryCode(codeElement.getChildText("countryCode"));
 
-			address.setLatitude(Double.parseDouble(codeElement
-					.getChildText("lat")));
-			address.setLongitude(Double.parseDouble(codeElement
-					.getChildText("lng")));
+			address.setLatitude(Double.parseDouble(codeElement.getChildText("lat")));
+			address.setLongitude(Double.parseDouble(codeElement.getChildText("lng")));
 
 			address.setAdminName1(codeElement.getChildText("adminName1"));
 			address.setAdminCode1(codeElement.getChildText("adminCode1"));
@@ -1129,17 +1012,20 @@ public class WebService {
 			address.setAdminCode2(codeElement.getChildText("adminCode2"));
 			address.setAdminName3(codeElement.getChildText("adminName3"));
 			address.setAdminCode3(codeElement.getChildText("adminCode3"));
+			address.setAdminName4(codeElement.getChildText("adminName4"));
+			address.setAdminCode4(codeElement.getChildText("adminCode4"));
 
 			return address;
 		}
 
 		return null;
 	}
+
 	/**
 	 * convenience method for {@link #search(ToponymSearchCriteria)}
 	 * 
-	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search
-	 *      web service documentation</a>
+	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search web
+	 *      service documentation</a>
 	 * 
 	 * @param q
 	 * @param countryCode
@@ -1149,10 +1035,9 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult search(String q, String countryCode,
-			String name, String[] featureCodes, int startRow) throws Exception {
-		return search(q, countryCode, name, featureCodes, startRow, null, null,
-				null);
+	public static ToponymSearchResult search(String q, String countryCode, String name, String[] featureCodes,
+			int startRow) throws Exception {
+		return search(q, countryCode, name, featureCodes, startRow, null, null, null);
 	}
 
 	/**
@@ -1160,14 +1045,12 @@ public class WebService {
 	 * 
 	 * The string fields will be transparently utf8 encoded within the call.
 	 * 
-	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search
-	 *      web service documentation</a>
+	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search web
+	 *      service documentation</a>
 	 * 
-	 * @param q
-	 *            search over all fields
+	 * @param q            search over all fields
 	 * @param countryCode
-	 * @param name
-	 *            search over name only
+	 * @param name         search over name only
 	 * @param featureCodes
 	 * @param startRow
 	 * @param language
@@ -1176,9 +1059,8 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult search(String q, String countryCode,
-			String name, String[] featureCodes, int startRow, String language,
-			Style style, String exactName) throws Exception {
+	public static ToponymSearchResult search(String q, String countryCode, String name, String[] featureCodes,
+			int startRow, String language, Style style, String exactName) throws Exception {
 		ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 		searchCriteria.setQ(q);
 		searchCriteria.setCountryCode(countryCode);
@@ -1194,31 +1076,29 @@ public class WebService {
 	/**
 	 * full text search on the GeoNames database.
 	 * 
-	 * This service gets the number of toponyms defined by the 'maxRows'
-	 * parameter. The parameter 'style' determines which fields are returned by
-	 * the service.
+	 * This service gets the number of toponyms defined by the 'maxRows' parameter.
+	 * The parameter 'style' determines which fields are returned by the service.
 	 * 
-	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search
-	 *      web service documentation</a>
+	 * @see <a href="http://www.geonames.org/export/geonames-search.html">search web
+	 *      service documentation</a>
 	 * 
-	 * <br>
+	 *      <br>
 	 * 
 	 *      <pre>
-	 * ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
-	 * searchCriteria.setQ(&quot;z&amp;uumlrich&quot;);
-	 * ToponymSearchResult searchResult = WebService.search(searchCriteria);
-	 * for (Toponym toponym : searchResult.toponyms) {
-	 * 	System.out.println(toponym.getName() + &quot; &quot; + toponym.getCountryName());
-	 * }
-	 * </pre>
+	 *      ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
+	 *      searchCriteria.setQ(&quot;z&amp;uumlrich&quot;);
+	 *      ToponymSearchResult searchResult = WebService.search(searchCriteria);
+	 *      for (Toponym toponym : searchResult.toponyms) {
+	 *      	System.out.println(toponym.getName() + &quot; &quot; + toponym.getCountryName());
+	 *      }
+	 *      </pre>
 	 * 
 	 * 
 	 * @param searchCriteria
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult search(
-			ToponymSearchCriteria searchCriteria) throws Exception {
+	public static ToponymSearchResult search(ToponymSearchCriteria searchCriteria) throws Exception {
 		ToponymSearchResult searchResult = new ToponymSearchResult();
 
 		String url = "/search?";
@@ -1227,24 +1107,18 @@ public class WebService {
 			url = url + "q=" + URLEncoder.encode(searchCriteria.getQ(), "UTF8");
 		}
 		if (searchCriteria.getNameEquals() != null) {
-			url = url + "&name_equals="
-					+ URLEncoder.encode(searchCriteria.getNameEquals(), "UTF8");
+			url = url + "&name_equals=" + URLEncoder.encode(searchCriteria.getNameEquals(), "UTF8");
 		}
 		if (searchCriteria.getNameStartsWith() != null) {
-			url = url
-					+ "&name_startsWith="
-					+ URLEncoder.encode(searchCriteria.getNameStartsWith(),
-							"UTF8");
+			url = url + "&name_startsWith=" + URLEncoder.encode(searchCriteria.getNameStartsWith(), "UTF8");
 		}
 
 		if (searchCriteria.getName() != null) {
-			url = url + "&name="
-					+ URLEncoder.encode(searchCriteria.getName(), "UTF8");
+			url = url + "&name=" + URLEncoder.encode(searchCriteria.getName(), "UTF8");
 		}
 
 		if (searchCriteria.getTag() != null) {
-			url = url + "&tag="
-					+ URLEncoder.encode(searchCriteria.getTag(), "UTF8");
+			url = url + "&tag=" + URLEncoder.encode(searchCriteria.getTag(), "UTF8");
 		}
 
 		if (searchCriteria.getCountryCode() != null) {
@@ -1266,20 +1140,16 @@ public class WebService {
 		}
 
 		if (searchCriteria.getAdminCode1() != null) {
-			url = url + "&adminCode1="
-					+ URLEncoder.encode(searchCriteria.getAdminCode1(), "UTF8");
+			url = url + "&adminCode1=" + URLEncoder.encode(searchCriteria.getAdminCode1(), "UTF8");
 		}
 		if (searchCriteria.getAdminCode2() != null) {
-			url = url + "&adminCode2="
-					+ URLEncoder.encode(searchCriteria.getAdminCode2(), "UTF8");
+			url = url + "&adminCode2=" + URLEncoder.encode(searchCriteria.getAdminCode2(), "UTF8");
 		}
 		if (searchCriteria.getAdminCode3() != null) {
-			url = url + "&adminCode3="
-					+ URLEncoder.encode(searchCriteria.getAdminCode3(), "UTF8");
+			url = url + "&adminCode3=" + URLEncoder.encode(searchCriteria.getAdminCode3(), "UTF8");
 		}
 		if (searchCriteria.getAdminCode4() != null) {
-			url = url + "&adminCode4="
-					+ URLEncoder.encode(searchCriteria.getAdminCode4(), "UTF8");
+			url = url + "&adminCode4=" + URLEncoder.encode(searchCriteria.getAdminCode4(), "UTF8");
 		}
 
 		if (searchCriteria.getLanguage() != null) {
@@ -1320,8 +1190,7 @@ public class WebService {
 		url = addUserName(url);
 
 		Element root = connectAndParse(url);
-		searchResult.totalResultsCount = Integer.parseInt(root
-				.getChildText("totalResultsCount"));
+		searchResult.totalResultsCount = Integer.parseInt(root.getChildText("totalResultsCount"));
 		searchResult.setStyle(Style.valueOf(root.getAttributeValue("style")));
 
 		for (Object obj : root.getChildren("geoname")) {
@@ -1344,8 +1213,7 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult children(int geonameId, String language,
-			Style style) throws Exception {
+	public static ToponymSearchResult children(int geonameId, String language, Style style) throws Exception {
 		return children(geonameId, language, style, 0);
 	}
 
@@ -1358,8 +1226,8 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult children(int geonameId, String language,
-			Style style, int maxRows) throws Exception {
+	public static ToponymSearchResult children(int geonameId, String language, Style style, int maxRows)
+			throws Exception {
 
 		ToponymSearchResult searchResult = new ToponymSearchResult();
 
@@ -1382,8 +1250,7 @@ public class WebService {
 		url = addUserName(url);
 
 		Element root = connectAndParse(url);
-		searchResult.totalResultsCount = Integer.parseInt(root
-				.getChildText("totalResultsCount"));
+		searchResult.totalResultsCount = Integer.parseInt(root.getChildText("totalResultsCount"));
 		searchResult.setStyle(Style.valueOf(root.getAttributeValue("style")));
 
 		for (Object obj : root.getChildren("geoname")) {
@@ -1404,8 +1271,7 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ToponymSearchResult neighbours(int geonameId,
-			String language, Style style) throws Exception {
+	public static ToponymSearchResult neighbours(int geonameId, String language, Style style) throws Exception {
 		ToponymSearchResult searchResult = new ToponymSearchResult();
 
 		String url = "/neighbours?";
@@ -1424,8 +1290,7 @@ public class WebService {
 		url = addUserName(url);
 
 		Element root = connectAndParse(url);
-		searchResult.totalResultsCount = Integer.parseInt(root
-				.getChildText("totalResultsCount"));
+		searchResult.totalResultsCount = Integer.parseInt(root.getChildText("totalResultsCount"));
 		searchResult.setStyle(Style.valueOf(root.getAttributeValue("style")));
 
 		for (Object obj : root.getChildren("geoname")) {
@@ -1440,8 +1305,8 @@ public class WebService {
 	/**
 	 * returns the hierarchy for a geonameId
 	 * 
-	 * @see <a
-	 *      href="http://www.geonames.org/export/place-hierarchy.html#hierarchy">Hierarchy
+	 * @see <a href=
+	 *      "http://www.geonames.org/export/place-hierarchy.html#hierarchy">Hierarchy
 	 *      service description</a>
 	 * 
 	 * @param geonameId
@@ -1450,8 +1315,7 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<Toponym> hierarchy(int geonameId, String language,
-			Style style) throws Exception {
+	public static List<Toponym> hierarchy(int geonameId, String language, Style style) throws Exception {
 
 		String url = "/hierarchy?";
 
@@ -1479,8 +1343,7 @@ public class WebService {
 		return toponyms;
 	}
 
-	public static void saveTags(String[] tags, Toponym toponym,
-			String username, String password) throws Exception {
+	public static void saveTags(String[] tags, Toponym toponym, String username, String password) throws Exception {
 		if (toponym.getGeoNameId() == 0) {
 			throw new Error("no geonameid specified");
 		}
@@ -1508,8 +1371,7 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<WikipediaArticle> wikipediaSearch(String q,
-			String language) throws Exception {
+	public static List<WikipediaArticle> wikipediaSearch(String q, String language) throws Exception {
 		List<WikipediaArticle> articles = new ArrayList<WikipediaArticle>();
 
 		String url = "/wikipediaSearch?";
@@ -1539,8 +1401,7 @@ public class WebService {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<WikipediaArticle> wikipediaSearchForTitle(String title,
-			String language) throws Exception {
+	public static List<WikipediaArticle> wikipediaSearchForTitle(String title, String language) throws Exception {
 		List<WikipediaArticle> articles = new ArrayList<WikipediaArticle>();
 
 		String url = "/wikipediaSearch?";
@@ -1562,8 +1423,8 @@ public class WebService {
 		return articles;
 	}
 
-	public static List<WikipediaArticle> findNearbyWikipedia(double latitude,
-			double longitude, String language) throws Exception {
+	public static List<WikipediaArticle> findNearbyWikipedia(double latitude, double longitude, String language)
+			throws Exception {
 		return findNearbyWikipedia(latitude, longitude, 0, language, 0);
 	}
 
@@ -1583,9 +1444,8 @@ public class WebService {
 	 * @return: list of wikipedia articles
 	 * @throws: Exception
 	 */
-	public static List<WikipediaArticle> findNearbyWikipedia(double latitude,
-			double longitude, double radius, String language, int maxRows)
-			throws Exception {
+	public static List<WikipediaArticle> findNearbyWikipedia(double latitude, double longitude, double radius,
+			String language, int maxRows) throws Exception {
 
 		List<WikipediaArticle> articles = new ArrayList<WikipediaArticle>();
 
@@ -1617,24 +1477,21 @@ public class WebService {
 
 	/**
 	 * GTOPO30 is a global digital elevation model (DEM) with a horizontal grid
-	 * spacing of 30 arc seconds (approximately 1 kilometer). GTOPO30 was
-	 * derived from several raster and vector sources of topographic
-	 * information.
+	 * spacing of 30 arc seconds (approximately 1 kilometer). GTOPO30 was derived
+	 * from several raster and vector sources of topographic information.
 	 * 
 	 * @param latitude
 	 * @param longitude
-	 * @return a single number giving the elevation in meters according to
-	 *         gtopo30, ocean areas have been masked as "no data" and have been
-	 *         assigned a value of -9999
+	 * @return a single number giving the elevation in meters according to gtopo30,
+	 *         ocean areas have been masked as "no data" and have been assigned a
+	 *         value of -9999
 	 * @throws IOException
-	 * @throws GeoNamesException 
+	 * @throws GeoNamesException
 	 */
-	public static int gtopo30(double latitude, double longitude)
-			throws IOException, GeoNamesException {
+	public static int gtopo30(double latitude, double longitude) throws IOException, GeoNamesException {
 		String url = "/gtopo30?lat=" + latitude + "&lng=" + longitude;
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		String gtopo30 = in.readLine();
 		in.close();
 		checkException(gtopo30);
@@ -1642,33 +1499,30 @@ public class WebService {
 	}
 
 	/**
-	 * Shuttle Radar Topography Mission (SRTM) elevation data. SRTM consisted of
-	 * a specially modified radar system that flew onboard the Space Shuttle
-	 * Endeavour during an 11-day mission in February of 2000. The dataset
-	 * covers land areas between 60 degrees north and 56 degrees south. This web
-	 * service is using SRTM3 data with data points located every 3-arc-second
-	 * (approximately 90 meters) on a latitude/longitude grid.
+	 * Shuttle Radar Topography Mission (SRTM) elevation data. SRTM consisted of a
+	 * specially modified radar system that flew onboard the Space Shuttle Endeavour
+	 * during an 11-day mission in February of 2000. The dataset covers land areas
+	 * between 60 degrees north and 56 degrees south. This web service is using
+	 * SRTM3 data with data points located every 3-arc-second (approximately 90
+	 * meters) on a latitude/longitude grid.
 	 * 
 	 * @param latitude
 	 * @param longitude
 	 * @return elevation or -32768 if unknown
 	 * @throws IOException
-	 * @throws GeoNamesException 
+	 * @throws GeoNamesException
 	 */
-	public static int srtm3(double latitude, double longitude)
-			throws IOException, GeoNamesException {
+	public static int srtm3(double latitude, double longitude) throws IOException, GeoNamesException {
 		String url = "/srtm3?lat=" + latitude + "&lng=" + longitude;
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		String srtm3 = in.readLine();
 		in.close();
 		checkException(srtm3);
 		return Integer.parseInt(srtm3);
 	}
 
-	public static int[] srtm3(double[] latitude, double[] longitude)
-			throws IOException {
+	public static int[] srtm3(double[] latitude, double[] longitude) throws IOException {
 		if (latitude.length != longitude.length) {
 			throw new Error("number of lats and longs must be equal");
 		}
@@ -1681,8 +1535,7 @@ public class WebService {
 		}
 		String url = "/srtm3?lats=" + lats + "&lngs=" + lngs;
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		for (int i = 0; i < elevation.length; i++) {
 			String srtm3 = in.readLine();
 			elevation[i] = Integer.parseInt(srtm3);
@@ -1691,20 +1544,49 @@ public class WebService {
 		return elevation;
 	}
 
-	public static int astergdem(double latitude, double longitude)
-			throws IOException, GeoNamesException {
+	public static int srtm1(double latitude, double longitude) throws IOException, GeoNamesException {
+		String url = "/srtm1?lat=" + latitude + "&lng=" + longitude;
+		url = addUserName(url);
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
+		String srtm1 = in.readLine();
+		in.close();
+		checkException(srtm1);
+		return Integer.parseInt(srtm1);
+	}
+
+	public static int[] srtm1(double[] latitude, double[] longitude) throws IOException {
+		if (latitude.length != longitude.length) {
+			throw new Error("number of lats and longs must be equal");
+		}
+		int[] elevation = new int[latitude.length];
+		String lats = "";
+		String lngs = "";
+		for (int i = 0; i < elevation.length; i++) {
+			lats += latitude[i] + ",";
+			lngs += longitude[i] + ",";
+		}
+		String url = "/srtm1?lats=" + lats + "&lngs=" + lngs;
+		url = addUserName(url);
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
+		for (int i = 0; i < elevation.length; i++) {
+			String srtm1 = in.readLine();
+			elevation[i] = Integer.parseInt(srtm1);
+		}
+		in.close();
+		return elevation;
+	}
+
+	public static int astergdem(double latitude, double longitude) throws IOException, GeoNamesException {
 		String url = "/astergdem?lat=" + latitude + "&lng=" + longitude;
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		String astergdem = in.readLine();
 		in.close();
 		checkException(astergdem);
 		return Integer.parseInt(astergdem);
 	}
 
-	public static int[] astergdem(double[] latitude, double[] longitude)
-			throws IOException {
+	public static int[] astergdem(double[] latitude, double[] longitude) throws IOException {
 		if (latitude.length != longitude.length) {
 			throw new Error("number of lats and longs must be equal");
 		}
@@ -1717,8 +1599,7 @@ public class WebService {
 		}
 		String url = "/astergdem?lats=" + lats + "&lngs=" + lngs;
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		for (int i = 0; i < elevation.length; i++) {
 			String astergdem = in.readLine();
 			elevation[i] = Integer.parseInt(astergdem);
@@ -1737,8 +1618,7 @@ public class WebService {
 	 * @throws IOException
 	 * @throws GeoNamesException
 	 */
-	public static String countryCode(double latitude, double longitude)
-			throws IOException, GeoNamesException {
+	public static String countryCode(double latitude, double longitude) throws IOException, GeoNamesException {
 		return countryCode(latitude, longitude, 0);
 	}
 
@@ -1747,34 +1627,84 @@ public class WebService {
 	 * 
 	 * @param latitude
 	 * @param longitude
-	 * @param radius
+	 * @param radius (optional)
 	 * 
 	 * @return iso country code for the given latitude/longitude
 	 * @throws IOException
 	 * @throws GeoNamesException
 	 */
-	public static String countryCode(double latitude, double longitude,
-			double radius) throws IOException, GeoNamesException {
+	public static String countryCode(double latitude, double longitude, double radius)
+			throws IOException, GeoNamesException {
 		String url = "/countryCode?lat=" + latitude + "&lng=" + longitude;
 		if (radius != 0) {
 			url += "&radius=" + radius;
 		}
 		url = addUserName(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				connect(url)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connect(url)));
 		String cc = in.readLine();
 		in.close();
 		if (cc != null && cc.length() == 2) {
 			return cc;
 		}
 		if (cc == null || cc.length() == 0) {
-			// nothing found return null 
+			// nothing found return null
 			return null;
 		}
 		// check whether we can parse an exception and throw it if we can
 		checkException(cc);
 		// something else was wrong, through generic exception
 		throw new GeoNamesException("unhandled exception");
+	}
+	
+	/**
+	 * 
+	 * @param latitude
+	 * @param longitude
+	 * @param radius (optional)
+	 * @param level (optional)
+	 * @param lang (optional)
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static CountrySubdivision countrySubdivision(double latitude, double longitude, double radius, int level, String lang)
+			throws IOException, Exception {
+		String url = "/countrySubdivision?lat=" + latitude + "&lng=" + longitude;
+		if (radius != 0) {
+			url += "&radius=" + radius;
+		}
+		if (level != 0) {
+			url += "&level=" + level;
+		}
+		if (lang!=null) {
+			url += "&lang=" + level;
+		}
+		url = addUserName(url);
+		Element root = connectAndParse(url);
+		for (Object obj : root.getChildren("countrySubdivision")) {
+			Element codeElement = (Element) obj;
+			CountrySubdivision countrySubdivision = new CountrySubdivision();
+			
+			countrySubdivision.setCountryCode(codeElement.getChildText("countryCode"));
+			countrySubdivision.setCountryName(codeElement.getChildText("countryName"));
+
+			countrySubdivision.setAdminName1(codeElement.getChildText("adminName1"));
+			countrySubdivision.setAdminCode1(codeElement.getChildText("adminCode1"));
+			countrySubdivision.setAdminName2(codeElement.getChildText("adminName2"));
+			countrySubdivision.setAdminCode2(codeElement.getChildText("adminCode2"));
+			countrySubdivision.setAdminName3(codeElement.getChildText("adminName3"));
+			countrySubdivision.setAdminCode3(codeElement.getChildText("adminCode3"));
+			countrySubdivision.setAdminName4(codeElement.getChildText("adminName4"));
+			countrySubdivision.setAdminCode4(codeElement.getChildText("adminCode4"));
+			countrySubdivision.setAdminName5(codeElement.getChildText("adminName5"));
+			countrySubdivision.setAdminCode5(codeElement.getChildText("adminCode5"));
+
+			countrySubdivision.setDistance(Double.parseDouble(codeElement.getChildText("distance")));
+
+			return countrySubdivision;
+		}
+
+		return null;
 	}
 
 	/**
@@ -1786,8 +1716,7 @@ public class WebService {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static Timezone timezone(double latitude, double longitude)
-			throws IOException, Exception {
+	public static Timezone timezone(double latitude, double longitude) throws IOException, Exception {
 
 		String url = "/timezone?";
 		double radius = 0;
@@ -1809,35 +1738,29 @@ public class WebService {
 			if (codeElement.getChildText("time") != null) {
 				String minuteDateFmt = "yyyy-MM-dd HH:mm";
 				SimpleDateFormat df = null;
-				if (codeElement.getChildText("time").length() == minuteDateFmt
-						.length()) {
+				if (codeElement.getChildText("time").length() == minuteDateFmt.length()) {
 					df = new SimpleDateFormat(minuteDateFmt);
 				} else {
 					df = new SimpleDateFormat(DATEFMT);
 				}
 				timezone.setTime(df.parse(codeElement.getChildText("time")));
 				if (codeElement.getChildText("sunrise") != null) {
-					timezone.setSunrise(df.parse(codeElement
-							.getChildText("sunrise")));
+					timezone.setSunrise(df.parse(codeElement.getChildText("sunrise")));
 				}
 				if (codeElement.getChildText("sunset") != null) {
-					timezone.setSunset(df.parse(codeElement
-							.getChildText("sunset")));
+					timezone.setSunset(df.parse(codeElement.getChildText("sunset")));
 				}
-				timezone.setGmtOffset(Double.parseDouble(codeElement
-						.getChildText("gmtOffset")));
-				timezone.setDstOffset(Double.parseDouble(codeElement
-						.getChildText("dstOffset")));
+				timezone.setGmtOffset(Double.parseDouble(codeElement.getChildText("gmtOffset")));
+				timezone.setDstOffset(Double.parseDouble(codeElement.getChildText("dstOffset")));
 			}
 			return timezone;
 		}
 
 		return null;
 	}
-	
-	//FIXME  implement and test
-	public static String ocean(double latitude, double longitude)
-			throws IOException, Exception {
+
+	// FIXME implement and test
+	public static String ocean(double latitude, double longitude) throws IOException, Exception {
 
 		String url = "/ocean?";
 		double radius = 0;
@@ -1853,7 +1776,7 @@ public class WebService {
 		for (Object obj : root.getChildren("ocean")) {
 			Element oceanElement = (Element) obj;
 			if (oceanElement != null) {
-				return oceanElement.getChildText("name");				
+				return oceanElement.getChildText("name");
 			}
 		}
 
@@ -1868,8 +1791,8 @@ public class WebService {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static WeatherObservation findNearByWeather(double latitude,
-			double longitude) throws IOException, Exception {
+	public static WeatherObservation findNearByWeather(double latitude, double longitude)
+			throws IOException, Exception {
 
 		String url = "/findNearByWeatherXML?";
 
@@ -1887,8 +1810,7 @@ public class WebService {
 		return null;
 	}
 
-	public static WeatherObservation weatherIcao(String icaoCode)
-			throws IOException, Exception {
+	public static WeatherObservation weatherIcao(String icaoCode) throws IOException, Exception {
 
 		String url = "/weatherIcaoXML?";
 
@@ -1923,8 +1845,7 @@ public class WebService {
 	 * sets the server name for the GeoNames server to be used for the requests.
 	 * Default is api.geonames.org
 	 * 
-	 * @param geoNamesServer
-	 *            the geonamesServer to set
+	 * @param geoNamesServer the geonamesServer to set
 	 */
 	public static void setGeoNamesServer(String pGeoNamesServer) {
 		if (pGeoNamesServer == null) {
@@ -1932,29 +1853,25 @@ public class WebService {
 		}
 		pGeoNamesServer = pGeoNamesServer.trim().toLowerCase();
 		// add default http protocol if it is missing
-		if (!pGeoNamesServer.startsWith("http://")
-				&& !pGeoNamesServer.startsWith("https://")) {
+		if (!pGeoNamesServer.startsWith("http://") && !pGeoNamesServer.startsWith("https://")) {
 			pGeoNamesServer = "http://" + pGeoNamesServer;
 		}
 		WebService.geoNamesServer = pGeoNamesServer;
 	}
 
 	/**
-	 * sets the default failover server for requests in case the main server is
-	 * not accessible. Default is api.geonames.org<br>
+	 * sets the default failover server for requests in case the main server is not
+	 * accessible. Default is api.geonames.org<br>
 	 * The failover server is only called if it is different from the main
 	 * server.<br>
 	 * The failover server is used for commercial GeoNames web service users.
 	 * 
-	 * @param geoNamesServerFailover
-	 *            the geoNamesServerFailover to set
+	 * @param geoNamesServerFailover the geoNamesServerFailover to set
 	 */
 	public static void setGeoNamesServerFailover(String geoNamesServerFailover) {
 		if (geoNamesServerFailover != null) {
-			geoNamesServerFailover = geoNamesServerFailover.trim()
-					.toLowerCase();
-			if (!geoNamesServerFailover.startsWith("http://")
-					&& !geoNamesServerFailover.startsWith("https://")) {
+			geoNamesServerFailover = geoNamesServerFailover.trim().toLowerCase();
+			if (!geoNamesServerFailover.startsWith("http://") && !geoNamesServerFailover.startsWith("https://")) {
 				geoNamesServerFailover = "http://" + geoNamesServerFailover;
 			}
 		}
@@ -1969,19 +1886,18 @@ public class WebService {
 	}
 
 	/**
-	 * @param proxy
-	 *            the proxy to set
+	 * @param proxy the proxy to set
 	 * 
-	 *            If you are behind a proxy and cannot change the java system
-	 *            properties, you can use this method to set a proxy. You define
-	 *            it like this:
+	 *              If you are behind a proxy and cannot change the java system
+	 *              properties, you can use this method to set a proxy. You define
+	 *              it like this:
 	 * 
-	 *            <pre>
+	 *              <pre>
 	 * <code>
 	 *            java.net.SocketAddress sa = new java.net.InetSocketAddress("myproxyserver", 8080);
 	 *            java.net.Proxy proxy = new java.net.Proxy(java.net.Proxy.Type.HTTP, sa);
 	 *            </code>
-	 * </pre>
+	 *              </pre>
 	 */
 	public static void setProxy(Proxy proxy) {
 		WebService.proxy = proxy;
@@ -1998,8 +1914,7 @@ public class WebService {
 	 * Sets the user name to be used for the requests. Needed to access the
 	 * commercial GeoNames web services.
 	 * 
-	 * @param userName
-	 *            the userName to set
+	 * @param userName the userName to set
 	 */
 	public static void setUserName(String userName) {
 		WebService.userName = userName;
@@ -2013,12 +1928,10 @@ public class WebService {
 	}
 
 	/**
-	 * sets the token to be used to authenticate the requests. This is an
-	 * optional parameter for the commercial version of the GeoNames web
-	 * services.
+	 * sets the token to be used to authenticate the requests. This is an optional
+	 * parameter for the commercial version of the GeoNames web services.
 	 * 
-	 * @param token
-	 *            the token to set
+	 * @param token the token to set
 	 */
 	public static void setToken(String token) {
 		WebService.token = token;
@@ -2032,8 +1945,7 @@ public class WebService {
 	}
 
 	/**
-	 * @param defaultStyle
-	 *            the defaultStyle to set
+	 * @param defaultStyle the defaultStyle to set
 	 */
 	public static void setDefaultStyle(Style defaultStyle) {
 		WebService.defaultStyle = defaultStyle;
@@ -2047,8 +1959,7 @@ public class WebService {
 	}
 
 	/**
-	 * @param readTimeOut
-	 *            the readTimeOut to set
+	 * @param readTimeOut the readTimeOut to set
 	 */
 	public static void setReadTimeOut(int readTimeOut) {
 		WebService.readTimeOut = readTimeOut;
@@ -2062,8 +1973,7 @@ public class WebService {
 	}
 
 	/**
-	 * @param connectTimeOut
-	 *            the connectTimeOut to set
+	 * @param connectTimeOut the connectTimeOut to set
 	 */
 	public static void setConnectTimeOut(int connectTimeOut) {
 		WebService.connectTimeOut = connectTimeOut;
