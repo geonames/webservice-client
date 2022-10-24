@@ -36,23 +36,32 @@ public class TextSummaryExtractor {
 		return extractSummary(pText, length, true);
 	}
 
-	public static String extractSummary(String pText, int length,
-			boolean stopAtParagraph) {
+	public static String extractSummary(String pText, int length, boolean stopAtParagraph) {
+		try {
+			return _extractSummary(pText, length, stopAtParagraph);
+		} catch (Error e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
+	}
+
+	private static String _extractSummary(String pText, int length, boolean stopAtParagraph) {
 		if (pText == null) {
 			return null;
 		}
-		
+
 		String textCopy = new String(pText);
 
 		// remove all wikipedia markup (paragraphs are kept)
 		//
 		StringBuilder summary = new StringBuilder();
 		int idx = 0;
+		int cnt = 0;
 
 		// loop over all characters in input string
-		while (idx > -1 && (summary.length() < 50 + 2 * length || length == 0)
-				&& idx < textCopy.length()) {
+		while (idx > -1 && (summary.length() < 50 + 2 * length || length == 0) && idx < textCopy.length()) {
 			// get next chacter
+			cnt++;
 			char c = textCopy.charAt(idx);
 
 			if (c == '{') {
@@ -62,8 +71,7 @@ public class TextSummaryExtractor {
 				if (textCopy.toLowerCase().indexOf("{{audio") == idx) {
 					int begLabelIdx = textCopy.lastIndexOf("|", endidx);
 					if (begLabelIdx > -1) {
-						String label = textCopy.substring(begLabelIdx + 1,
-								endidx - 2).trim();
+						String label = textCopy.substring(begLabelIdx + 1, endidx - 2).trim();
 						summary.append(label);
 					}
 				}
@@ -76,8 +84,7 @@ public class TextSummaryExtractor {
 							endLabelIdx = textCopy.indexOf("|", begLabelIdx);
 						}
 
-						String label = textCopy.substring(begLabelIdx + 1,
-								endLabelIdx).trim();
+						String label = textCopy.substring(begLabelIdx + 1, endLabelIdx).trim();
 						summary.append(label);
 					}
 				}
@@ -143,8 +150,8 @@ public class TextSummaryExtractor {
 					int endHeaderIdx = textCopy.indexOf("==", idx + 2);
 					if (endHeaderIdx > -1) {
 						idx = endHeaderIdx + 2;
+						continue;
 					}
-					continue;
 				}
 			}
 
@@ -159,9 +166,8 @@ public class TextSummaryExtractor {
 		textString = textString.replaceAll("\\([, ]*", "(");
 		textString = textString.replaceAll("[, ]*\\)", ")");
 
-		textString = removeWhiteSpace(
-				textString.replaceAll("\r", " ").replaceAll("\n", " ")
-						.replaceAll("\t", " ")).trim();
+		textString = removeWhiteSpace(textString.replaceAll("\r", " ").replaceAll("\n", " ").replaceAll("\t", " "))
+				.trim();
 
 		textString = removeBold(textString);
 		textString = removeItalic(textString);
@@ -233,6 +239,11 @@ public class TextSummaryExtractor {
 			}
 			idx++;
 		}
+
+		if (pIdx > idx) {
+			throw new Error("error in skip html comment for " + pText);
+		}
+
 		return idx;
 	}
 
@@ -257,10 +268,14 @@ public class TextSummaryExtractor {
 			}
 			idx++;
 		}
+		if (pIdx > idx) {
+			throw new Error("error in skip html comment for " + pText);
+		}
+
 		return idx;
 	}
 
-/**
+	/**
 	 * @param pText
 	 * @param pIdx,
 	 *            pos in text to start with, MUST be a '<'
@@ -276,11 +291,13 @@ public class TextSummaryExtractor {
 			if (pText.length() < idx + 2) {
 				return pText.length();
 			}
-			if (pText.charAt(idx) == '-' && pText.charAt(idx + 1) == '-'
-					&& pText.charAt(idx + 2) == '>') {
+			if (pText.charAt(idx) == '-' && pText.charAt(idx + 1) == '-' && pText.charAt(idx + 2) == '>') {
 				return idx + 3;
 			}
 			idx++;
+		}
+		if (pIdx > idx) {
+			throw new Error("error in skip html comment for " + pText);
 		}
 		return idx;
 	}
@@ -321,6 +338,10 @@ public class TextSummaryExtractor {
 		if (end != -1) {
 			idx = end;
 		}
+		if (pIdx > idx) {
+			throw new Error("error in skip html comment for " + pText);
+		}
+
 		return idx;
 	}
 

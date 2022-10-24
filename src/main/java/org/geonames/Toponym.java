@@ -27,6 +27,8 @@ public class Toponym {
 	private int geoNameId;
 
 	private String name;
+	
+	private String asciiName;
 
 	private String alternateNames;
 
@@ -212,6 +214,20 @@ public class Toponym {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the asciiName
+	 */
+	public String getAsciiName() {
+		return asciiName;
+	}
+
+	/**
+	 * @param asciiName the asciiName to set
+	 */
+	public void setAsciiName(String asciiName) {
+		this.asciiName = asciiName;
 	}
 
 	/**
